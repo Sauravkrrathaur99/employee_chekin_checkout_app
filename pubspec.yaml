@@ -1,0 +1,31 @@
+name: ol_app_checkin_out
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  intl: ^0.18.0  # Add this line
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Adding the assets section to include your image
+  assets:
+    - assets/image_checkincheckout_home.png
+    - assets/set_location_attendance.png
