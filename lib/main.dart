@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // For Timer class
 import 'package:intl/intl.dart'; // For date formatting
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: HomePage(),
     );
@@ -18,6 +20,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -26,9 +30,9 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 1; // Default to Home page
 
   final List<Widget> _screens = [
-    HistoryPage(), // History screen
-    HomePageContent(), // Home screen
-    UserPage(), // User screen
+    const HistoryPage(), // History screen
+    const HomePageContent(), // Home screen
+    const UserPage(), // User screen
   ];
 
   @override
@@ -42,7 +46,7 @@ class _HomePageState extends State<HomePage> {
             _currentIndex = index;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: 'History',
@@ -62,6 +66,8 @@ class _HomePageState extends State<HomePage> {
 }
 
 class HomePageContent extends StatefulWidget {
+  const HomePageContent({super.key});
+
   @override
   _HomePageContentState createState() => _HomePageContentState();
 }
@@ -75,9 +81,8 @@ class _HomePageContentState extends State<HomePageContent> {
     _startTimer();
   }
 
-  // Timer function to update the countdown every second
   void _startTimer() {
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_start > 0) {
         setState(() {
           _start--;
@@ -88,7 +93,6 @@ class _HomePageContentState extends State<HomePageContent> {
     });
   }
 
-  // Format the countdown time as HH:mm:ss
   String get _formattedTime {
     int hours = _start ~/ 3600;
     int minutes = (_start % 3600) ~/ 60;
@@ -96,180 +100,117 @@ class _HomePageContentState extends State<HomePageContent> {
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  // Get the current date and day
   String get _formattedDate {
     final now = DateTime.now();
-    return DateFormat('EEEE, MMM dd, yyyy').format(now); // Day of the week, Month day, Year
+    return DateFormat('EEEE, MMM dd, yyyy').format(now);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            // Upper section (blue background) wrapped in SafeArea
-            SafeArea(
-              child: Container(
-                color: Color(0xFF0F1C3E), // Dark blue background
-                padding: EdgeInsets.all(16.0),
-                height: MediaQuery.of(context).size.height * 0.30, // 30% of the screen height
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Welcome, Saurav Kumar Rathaur, Glad to have you here',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center, // Center-align the text
-                    ),
-                    SizedBox(height: 20), // Add some space between the text and image
-                    // Image centered below the text
-                    Center(
-                      child: Image.asset(
-                        'assets/image_checkincheckout_home.png', // Replace with your image path
-                        width: 250, // Width of the image (you can adjust as needed)
-                        height: 250, // Height of the image (you can adjust as needed)
-                        fit: BoxFit.contain, // Makes sure the image fits within the specified dimensions
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // Lower section (white background) taking the remaining height
-            Expanded(
-              child: Container(
-                color: Colors.white, // White background
-                padding: EdgeInsets.all(16.0),
-                child: GridView.count(
-                  crossAxisCount: 2, // 2 boxes in each row
-                  crossAxisSpacing: 16.0, // Space between boxes horizontally
-                  mainAxisSpacing: 16.0, // Space between boxes vertically
-                  children: [
-                    _buildInfoBox(
-                      'assets/set_location_attendance.png', // Image path for the first box
-                      'Set Location WFH', // Text below the image
-                    ),
-                    _buildInfoBox(
-                      'assets/set_location_attendance.png', // Replace with actual image path
-                      'Another Action', // Text for the second box
-                    ),
-                    _buildInfoBox(
-                      'assets/set_location_attendance.png', // Replace with actual image path
-                      'Another Action', // Text for the third box
-                    ),
-                    _buildInfoBox(
-                      'assets/set_location_attendance.png', // Replace with actual image path
-                      'Another Action', // Text for the fourth box
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        // Cylindrical shape at the junction of the two sections
-        Positioned(
-          top: MediaQuery.of(context).size.height * 0.34 - 22, // Position it at the junction (adjusted to 30% height)
-          left: (MediaQuery.of(context).size.width - 500) / 2, // Center it horizontally by subtracting half the width of the cylinder
-          child: Container(
-            width: 500, // Width of the cylindrical shape
-            height: 80, // Increased height for accommodating the date and time
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25), // Rounded corners for cylindrical effect
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 5,
-                  offset: Offset(0, 2), // Shadow to give it a floating effect
-                ),
-              ],
-            ),
-            child: Row(
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Upper Section (Blue background)
+          Container(
+            color: const Color(0xFF0F1C3E),
+            height: screenHeight * 0.3, // 30% of screen height
+            width: screenWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Left Section for the date display
-                Expanded(
-                  child: Container(
-                    // color: Colors.blue[100], // Background color for the left section
-                    child: Center(
-                      child: Text(
-                        _formattedDate, // Display the current date and day
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                const Spacer(),
+                const Text(
+                  'Welcome, Saurav Kumar Rathaur',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                // Center Section for the timer icon
-                Expanded(
-                  child: Container(
-                    // color: Colors.green[100], // Background color for the center section
-                    child: Center(
-                      child: Icon(
-                        Icons.timer, // Timer icon
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ),
+                const Spacer(),
+                Image.asset(
+                  'assets/image_checkincheckout_home.png',
+                  width: screenWidth * 0.5,
+                  height: screenHeight * 0.2,
+                  fit: BoxFit.contain,
                 ),
-                // Right Section for the timer display
-                Expanded(
-                  child: Container(
-                    // color: Colors.orange[100], // Background color for the right section
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Work Time: ',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _formattedTime, // Display the timer
-                            style: TextStyle(
-                              color: Colors.orange,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                const Spacer(),
               ],
             ),
           ),
-        ),
-      ],
+          // Cylindrical Shape above the junction using Transform
+          Transform.translate(
+            offset: const Offset(0, -10), // Move up by 10 units
+            child: Container(
+              width: screenWidth * 0.9,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              margin: const EdgeInsets.only(top: 1), // Keep original margin
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text(
+                    _formattedDate,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const Icon(Icons.timer, color: Colors.blue),
+                  Text(
+                    'Work Time: $_formattedTime',
+                    style: const TextStyle(color: Colors.orange, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Lower Section (Grid with Info Boxes)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.count(
+              crossAxisCount: screenWidth > 600 ? 4 : 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: List.generate(
+                4,
+                    (index) => _buildInfoBox(
+                  'assets/set_location_attendance.png',
+                  'Action ${index + 1}',
+                  screenWidth,
+                  screenHeight,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // Widget to create the transparent box with image and text below it
-  Widget _buildInfoBox(String imagePath, String text) {
+  Widget _buildInfoBox(String imagePath, String text, double width, double height) {
     return Container(
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7), // Transparent background with some opacity
-        borderRadius: BorderRadius.circular(12), // Rounded corners
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
             blurRadius: 8,
-            offset: Offset(0, 4), // Shadow position
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -277,19 +218,15 @@ class _HomePageContentState extends State<HomePageContent> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            imagePath, // Display the image from the given path
-            width: 150, // Adjust the size of the image as needed
-            height: 150, // Adjust the size of the image as needed
-            fit: BoxFit.cover, // Ensure the image fits properly
+            imagePath,
+            width: width * 0.2,
+            height: height * 0.1,
+            fit: BoxFit.cover,
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            text, // Text displayed below the image
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+            text,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -297,18 +234,21 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 }
 
-// History Page
+// Dummy pages
 class HistoryPage extends StatelessWidget {
+  const HistoryPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('History Page', style: TextStyle(fontSize: 24)));
+    return const Center(child: Text('History Page'));
   }
 }
 
-// User Page
 class UserPage extends StatelessWidget {
+  const UserPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('User Page', style: TextStyle(fontSize: 24)));
+    return const Center(child: Text('User Page'));
   }
 }
