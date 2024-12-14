@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  connectivity_plus: ^3.0.3
+
 
   intl: ^0.20.1  # Add this line
 
@@ -32,3 +32,6 @@ flutter:
   assets:
     - assets/image_checkincheckout_home.png
     - assets/set_location_attendance.png
+    - assets/login_bg.png
+    - assets/Microsoft_Logo_16px.png
+    - assets/Microsoft_Logo_512px.png

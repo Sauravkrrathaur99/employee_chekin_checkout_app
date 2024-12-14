@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // For Timer class
 import 'package:intl/intl.dart'; // For date formatting
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'login.dart'; // Import the login page
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      // home: HomePage(),
+      home: LoginScreen(), // Changed LoginPage to LoginScreen
+
     );
   }
 }
@@ -38,7 +40,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex], // Display the selected screen
+      body: SafeArea(
+        child: _screens[_currentIndex], // Display the selected screen within SafeArea
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -110,92 +114,94 @@ class _HomePageContentState extends State<HomePageContent> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Upper Section (Blue background)
-          Container(
-            color: const Color(0xFF0F1C3E),
-            height: screenHeight * 0.3, // 30% of screen height
-            width: screenWidth,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Spacer(),
-                const Text(
-                  'Welcome, Saurav Kumar Rathaur',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const Spacer(),
-                Image.asset(
-                  'assets/image_checkincheckout_home.png',
-                  width: screenWidth * 0.5,
-                  height: screenHeight * 0.2,
-                  fit: BoxFit.contain,
-                ),
-                const Spacer(),
-              ],
-            ),
-          ),
-          // Cylindrical Shape above the junction using Transform
-          Transform.translate(
-            offset: const Offset(0, -10), // Move up by 10 units
-            child: Container(
-              width: screenWidth * 0.9,
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              margin: const EdgeInsets.only(top: 1), // Keep original margin
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 5,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Upper Section (Blue background)
+            Container(
+              color: const Color(0xFF0F1C3E),
+              height: screenHeight * 0.3, // 30% of screen height
+              width: screenWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    _formattedDate,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  const Spacer(),
+                  const Text(
+                    'Welcome, Saurav Kumar Rathaur',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  const Icon(Icons.timer, color: Colors.blue),
-                  Text(
-                    'Work Time: $_formattedTime',
-                    style: const TextStyle(color: Colors.orange, fontSize: 16),
+                  const Spacer(),
+                  Image.asset(
+                    'assets/image_checkincheckout_home.png',
+                    width: screenWidth * 0.5,
+                    height: screenHeight * 0.2,
+                    fit: BoxFit.contain,
                   ),
+                  const Spacer(),
                 ],
               ),
             ),
-          ),
-          // Lower Section (Grid with Info Boxes)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.count(
-              crossAxisCount: screenWidth > 600 ? 4 : 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: List.generate(
-                4,
-                    (index) => _buildInfoBox(
-                  'assets/set_location_attendance.png',
-                  'Action ${index + 1}',
-                  screenWidth,
-                  screenHeight,
+            // Cylindrical Shape above the junction using Transform
+            Transform.translate(
+              offset: const Offset(0, -10), // Move up by 10 units
+              child: Container(
+                width: screenWidth * 0.9,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                margin: const EdgeInsets.only(top: 1), // Keep original margin
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      _formattedDate,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const Icon(Icons.timer, color: Colors.blue),
+                    Text(
+                      'Work Time: $_formattedTime',
+                      style: const TextStyle(color: Colors.orange, fontSize: 16),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            // Lower Section (Grid with Info Boxes)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.count(
+                crossAxisCount: screenWidth > 600 ? 4 : 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: List.generate(
+                  4,
+                      (index) => _buildInfoBox(
+                    'assets/set_location_attendance.png',
+                    'Action ${index + 1}',
+                    screenWidth,
+                    screenHeight,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +246,7 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('History Page'));
+    return const SafeArea(child: Center(child: Text('History Page')));
   }
 }
 
@@ -249,6 +255,6 @@ class UserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('User Page'));
+    return const SafeArea(child: Center(child: Text('User Page')));
   }
 }
