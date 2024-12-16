@@ -5,6 +5,8 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'login.dart'; // Import the login page
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:network_info_plus/network_info_plus.dart'; // Import to get network details
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -83,15 +85,17 @@ class _HomePageContentState extends State<HomePageContent> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   ConnectivityResult _connectionStatus = ConnectivityResult.none; // Declare connection status
   String _wifiStatus = "Unknown Connectivity Status"; // To hold the connectivity status message
+  String _wifiSsid = ""; // To hold the SSID
+  String _wifiBssid = ""; // To hold the BSSID
 
   @override
   void initState() {
     super.initState();
     _startTimer();
     initConnectivity();
-
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _fetchWifiDetails(); // Fetch Wi-Fi details
   }
 
   @override
@@ -103,7 +107,6 @@ class _HomePageContentState extends State<HomePageContent> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
     late List<ConnectivityResult> result;
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
@@ -111,9 +114,6 @@ class _HomePageContentState extends State<HomePageContent> {
       return;
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) {
       return Future.value(null);
     }
@@ -127,7 +127,6 @@ class _HomePageContentState extends State<HomePageContent> {
         _connectionStatus = result.first;  // Get the first result from the list
       });
     }
-
   }
 
   void _startTimer() {
@@ -139,6 +138,18 @@ class _HomePageContentState extends State<HomePageContent> {
       } else {
         timer.cancel();
       }
+    });
+  }
+
+  // Fetch Wi-Fi details such as SSID and BSSID
+  Future<void> _fetchWifiDetails() async {
+    final NetworkInfo _networkInfo = NetworkInfo();
+    final ssid = await _networkInfo.getWifiName(); // Get the SSID
+    final bssid = await _networkInfo.getWifiBSSID(); // Get the BSSID
+
+    setState(() {
+      _wifiSsid = ssid ?? "Unknown SSID";  // Set SSID or default to "Unknown SSID"
+      _wifiBssid = bssid ?? "Unknown BSSID";  // Set BSSID or default to "Unknown BSSID"
     });
   }
 
@@ -279,39 +290,33 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-
-
   String _getConnectionStatusText() {
-    // Replace this with the actual logic if needed, or assume these two MAC addresses as static values
-    String? macAddress = _getMacAddress(); // If needed, replace with actual MAC retrieval logic
-
+    // Only fetch Wi-Fi details if we are connected to Wi-Fi or mobile data
+    if (_connectionStatus == ConnectivityResult.wifi || _connectionStatus == ConnectivityResult.mobile) {
+      _fetchWifiDetails(); // Fetch Wi-Fi details when connectivity changes
+    }
     switch (_connectionStatus) {
       case ConnectivityResult.mobile:
+        // _fetchWifiDetails();
         return 'Please Be In Your Corporate Network';
 
       case ConnectivityResult.wifi:
-      // Check the MAC address and return corresponding message
-        if (macAddress == '00-F4-8D-3E-25-58') {
-          return 'Connected via MishiTech';
-        } else if (macAddress == '28-16-AD-57-A1-02') {
+      // Check for the specific BSSIDs
+        if (_wifiBssid == 'a8:88:1f:52:6d:4b') {
+          return 'Connected via Mishitech';
+        } else if (_wifiBssid == 'a8:88:1f:cc:0d:5a') {
           return 'Connected via Onelogica';
         } else {
-          return 'Please Be In Your Corporate Network';
+          return 'Please be in your corporate network';
         }
 
       case ConnectivityResult.none:
+        // _fetchWifiDetails();
         return 'No Internet Connection, connect to your corporate network';
 
       default:
         return 'Unknown Connectivity Status';
     }
-  }
-
-// Placeholder method to simulate retrieving the MAC address.
-// In a real implementation, this should return the actual MAC address of the connected Wi-Fi network.
-  String? _getMacAddress() {
-    // You can return one of the two MAC addresses for testing:
-    return '00-F4-8D-3E-25-58'; // or '28-16-AD-57-A1-02' for testing
   }
 
   Widget _buildInfoBox(String imagePath, String text, double width, double height) {
@@ -333,13 +338,13 @@ class _HomePageContentState extends State<HomePageContent> {
         children: [
           Image.asset(
             imagePath,
-            width: width * 0.2,
-            height: height * 0.1,
-            fit: BoxFit.cover,
+            width: width * 0.15, // Adjust size of the image
+            height: height * 0.15,
           ),
           const SizedBox(height: 8),
           Text(
             text,
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ],
@@ -348,13 +353,17 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 }
 
-// Dummy pages
+
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(child: Center(child: Text('History Page')));
+    return const Scaffold(
+      body: Center(
+        child: Text('History Page'),
+      ),
+    );
   }
 }
 
@@ -363,6 +372,10 @@ class UserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(child: Center(child: Text('User Page')));
+    return const Scaffold(
+      body: Center(
+        child: Text('User Page'),
+      ),
+    );
   }
 }
