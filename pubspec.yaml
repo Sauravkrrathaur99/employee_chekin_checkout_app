@@ -14,8 +14,9 @@ dependencies:
 
 
   intl: ^0.20.1  # Add this line
-
   cupertino_icons: ^1.0.8
+  connectivity_plus: ^6.1.1
+
 
   
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // For Timer class
+import 'dart:developer' as developer;
 import 'package:intl/intl.dart'; // For date formatting
 import 'login.dart'; // Import the login page
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,9 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      // home: HomePage(),
-      home: LoginScreen(), // Changed LoginPage to LoginScreen
-
+      home: HomePage(),
     );
   }
 }
@@ -78,11 +79,55 @@ class HomePageContent extends StatefulWidget {
 
 class _HomePageContentState extends State<HomePageContent> {
   int _start = 3600; // 1 hour countdown (in seconds)
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  ConnectivityResult _connectionStatus = ConnectivityResult.none; // Declare connection status
+  String _wifiStatus = "Unknown Connectivity Status"; // To hold the connectivity status message
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    initConnectivity();
+
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late List<ConnectivityResult> result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException catch (e) {
+      developer.log('Couldn\'t check connectivity status', error: e);
+      return;
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
+    if (result.isNotEmpty) {
+      setState(() {
+        _connectionStatus = result.first;  // Get the first result from the list
+      });
+    }
+
   }
 
   void _startTimer() {
@@ -180,6 +225,34 @@ class _HomePageContentState extends State<HomePageContent> {
                 ),
               ),
             ),
+            // Connectivity Status
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.network_check, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(
+                      _getConnectionStatusText(),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Lower Section (Grid with Info Boxes)
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -204,6 +277,41 @@ class _HomePageContentState extends State<HomePageContent> {
         ),
       ),
     );
+  }
+
+
+
+  String _getConnectionStatusText() {
+    // Replace this with the actual logic if needed, or assume these two MAC addresses as static values
+    String? macAddress = _getMacAddress(); // If needed, replace with actual MAC retrieval logic
+
+    switch (_connectionStatus) {
+      case ConnectivityResult.mobile:
+        return 'Please Be In Your Corporate Network';
+
+      case ConnectivityResult.wifi:
+      // Check the MAC address and return corresponding message
+        if (macAddress == '00-F4-8D-3E-25-58') {
+          return 'Connected via MishiTech';
+        } else if (macAddress == '28-16-AD-57-A1-02') {
+          return 'Connected via Onelogica';
+        } else {
+          return 'Please Be In Your Corporate Network';
+        }
+
+      case ConnectivityResult.none:
+        return 'No Internet Connection, connect to your corporate network';
+
+      default:
+        return 'Unknown Connectivity Status';
+    }
+  }
+
+// Placeholder method to simulate retrieving the MAC address.
+// In a real implementation, this should return the actual MAC address of the connected Wi-Fi network.
+  String? _getMacAddress() {
+    // You can return one of the two MAC addresses for testing:
+    return '00-F4-8D-3E-25-58'; // or '28-16-AD-57-A1-02' for testing
   }
 
   Widget _buildInfoBox(String imagePath, String text, double width, double height) {
